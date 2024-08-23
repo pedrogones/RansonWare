@@ -28,7 +28,7 @@ pip install cryptography
 
    Crie alguns arquivos de texto simples para testar a criptografia. Por exemplo:
 
-   echo "Este é o conteúdo do teste1." > teste1.txt
+   echo "Este é o conteúdo do teste1." > teste1.txt  <br>
    echo "Este é o conteúdo do teste2." > teste2.txt
 
 
