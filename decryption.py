@@ -1,44 +1,59 @@
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 import os
 
 def read_key_from_file(file_path):
+    """Lê a chave de criptografia a partir de um arquivo."""
     with open(file_path, 'r') as f:
         return f.read().strip()
 
-# Função para descriptografar o arquivo
 def decrypt_file(file_path, key):
+    """Descriptografa um arquivo criptografado e salva o resultado em um novo arquivo."""
+    # Abre o arquivo criptografado e lê seu conteúdo
     with open(file_path, 'rb') as f:
         encrypted_data = f.read()
     
-    iv = encrypted_data[:16]  # IV é o primeiro bloco de 16 bytes
-    data = encrypted_data[16:]
+    # Extrai o IV (vetor de inicialização) dos primeiros 16 bytes do arquivo criptografado
+    iv = encrypted_data[:16]
     
+    # Encontra o índice do separador de mensagem no arquivo criptografado
+    sep_index = encrypted_data.find(b'\n', 16)
+    if sep_index == -1:
+        raise ValueError("Separator not found in encrypted data.")
+    
+    # Divide os dados criptografados e a mensagem de resgate
+    data = encrypted_data[16:sep_index]
+    message = encrypted_data[sep_index+1:]
+    
+    # Configura o objeto Cipher com AES no modo CFB
     cipher = Cipher(algorithms.AES(bytes.fromhex(key)), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    padded_data = decryptor.update(data) + decryptor.finalize()
     
-    # Remover padding
-    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
-    data = unpadder.update(padded_data) + unpadder.finalize()
+    # Descriptografa os dados
+    decrypted_data = decryptor.update(data) + decryptor.finalize()
     
+    # Cria o caminho para o arquivo descriptografado
     decrypted_file_path = file_path.replace('.aes', '.decrypted.txt')
+    
+    # Salva os dados descriptografados no arquivo
     with open(decrypted_file_path, 'wb') as f:
-        f.write(data)
+        f.write(decrypted_data)
     
     print(f"Arquivo descriptografado salvo em: {decrypted_file_path}")
 
-# Caminho do diretório onde os arquivos serão processados
+# Diretório onde os arquivos criptografados estão localizados
 target_directory = os.path.expanduser("~/testandoRansonWare")
 
-# Caminho do arquivo de chave
+# Caminho do arquivo que contém a chave de criptografia
 key_file_path = os.path.join(os.path.expanduser("~"), 'ransonware', 'key.txt')
+
+# Lê a chave de criptografia do arquivo
 key = read_key_from_file(key_file_path)
 
-# Descriptografa arquivos
+# Itera sobre todos os arquivos no diretório alvo
 for root, dirs, files in os.walk(target_directory):
     for file in files:
+        # Descriptografa arquivos que têm a extensão .aes
         if file.endswith(".aes"):
             file_path = os.path.join(root, file)
             decrypt_file(file_path, key)
