@@ -1,37 +1,44 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.backends import default_backend
 import os
-import shutil
-import pyAesCrypt
-from pathlib import Path
-import tkinter as tk
-from tkinter import messagebox
-import tkinter.simpledialog
 
-# Define as pastas para descriptografar
-folders_path = [
-    str(os.path.join(Path.home(), "Downloads")),
-    str(os.path.join(Path.home(), "Documents"))
-]
+def read_key_from_file(file_path):
+    with open(file_path, 'r') as f:
+        return f.read().strip()
 
-# Obtém a chave de descriptografia
-root = tk.Tk()
-root.withdraw()
-key = tkinter.simpledialog.askstring("Decryption Key", "Enter the decryption key:", parent=root)
+# Função para descriptografar o arquivo
+def decrypt_file(file_path, key):
+    with open(file_path, 'rb') as f:
+        encrypted_data = f.read()
+    
+    iv = encrypted_data[:16]  # IV é o primeiro bloco de 16 bytes
+    data = encrypted_data[16:]
+    
+    cipher = Cipher(algorithms.AES(bytes.fromhex(key)), modes.CFB(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    padded_data = decryptor.update(data) + decryptor.finalize()
+    
+    # Remover padding
+    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+    data = unpadder.update(padded_data) + unpadder.finalize()
+    
+    decrypted_file_path = file_path.replace('.aes', '.decrypted.txt')
+    with open(decrypted_file_path, 'wb') as f:
+        f.write(data)
+    
+    print(f"Arquivo descriptografado salvo em: {decrypted_file_path}")
 
-# Descriptografa todos os arquivos em cada pasta
-for folder_path in folders_path:
-    for file in os.listdir(folder_path):
-        bufferSize = 64 * 1024
-        # Obtém o caminho do arquivo atual
-        file_path = os.path.join(folder_path, file)
+# Caminho do diretório onde os arquivos serão processados
+target_directory = os.path.expanduser("~/testandoRansonWare")
+
+# Caminho do arquivo de chave
+key_file_path = os.path.join(os.path.expanduser("~"), 'ransonware', 'key.txt')
+key = read_key_from_file(key_file_path)
+
+# Descriptografa arquivos
+for root, dirs, files in os.walk(target_directory):
+    for file in files:
         if file.endswith(".aes"):
-            # Descriptografa o arquivo
-            pyAesCrypt.decryptFile(file_path, file_path[:-4], key, bufferSize)
-            # Move o arquivo descriptografado para o destino
-            destination_path = os.path.join(folder_path, "decrypted_" + file[:-4])
-            shutil.move(file_path[:-4], destination_path)
-            # Exclui o arquivo criptografado
-            os.remove(file_path)
-
-# Exibe uma mensagem informando que a descriptografia foi concluída
-messagebox.showinfo("Decryption Complete", "All files in the folders have been decrypted.")
-root.mainloop()
+            file_path = os.path.join(root, file)
+            decrypt_file(file_path, key)
