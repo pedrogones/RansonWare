@@ -1,35 +1,37 @@
 import os
-import shutil # for moving files
-import pyAesCrypt # for decryption
+import shutil
+import pyAesCrypt
 from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.simpledialog
 
+# Define as pastas para descriptografar
 folders_path = [
     str(os.path.join(Path.home(), "Downloads")),
     str(os.path.join(Path.home(), "Documents"))
 ]
-# Get the key
+
+# Obtém a chave de descriptografia
 root = tk.Tk()
 root.withdraw()
 key = tkinter.simpledialog.askstring("Decryption Key", "Enter the decryption key:", parent=root)
 
-# Decrypt every file in each folder
+# Descriptografa todos os arquivos em cada pasta
 for folder_path in folders_path:
     for file in os.listdir(folder_path):
-        bufferSize = 64*1024
-        # Get the path for the current file
+        bufferSize = 64 * 1024
+        # Obtém o caminho do arquivo atual
         file_path = os.path.join(folder_path, file)
         if file.endswith(".aes"):
-            # Decrypt the file
+            # Descriptografa o arquivo
             pyAesCrypt.decryptFile(file_path, file_path[:-4], key, bufferSize)
-            # Move the decrypted file
-            destination_path = os.path.join(folder_path,"decrypted_"+file[:-4])
+            # Move o arquivo descriptografado para o destino
+            destination_path = os.path.join(folder_path, "decrypted_" + file[:-4])
             shutil.move(file_path[:-4], destination_path)
-            # Delete the encrypted file
+            # Exclui o arquivo criptografado
             os.remove(file_path)
 
-# Use tkinter to display a message that the decryption is complete
+# Exibe uma mensagem informando que a descriptografia foi concluída
 messagebox.showinfo("Decryption Complete", "All files in the folders have been decrypted.")
 root.mainloop()
