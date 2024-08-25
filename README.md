@@ -1,8 +1,5 @@
-Aqui está um exemplo de um arquivo README.md para o seu projeto no GitHub. Este README descreve como criar o ambiente de teste, configurar os arquivos, e executar os scripts de criptografia e descriptografia.
-
----
-
 # Projeto de Criptografia e Descriptografia
+---
 
 Este projeto demonstra a criptografia e descriptografia de arquivos usando o algoritmo AES (Advanced Encryption Standard). O projeto inclui dois scripts Python: um para criptografar arquivos e adicionar uma mensagem de resgate e outro para descriptografar os arquivos criptografados.
 
