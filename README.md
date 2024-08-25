@@ -1,4 +1,4 @@
-# Projeto de Criptografia e Descriptografia
+# Projeto de Criptografia e Descriptografia - Ransonware
 ---
 
 Este projeto demonstra a criptografia e descriptografia de arquivos usando o algoritmo AES (Advanced Encryption Standard). O projeto inclui dois scripts Python: um para criptografar arquivos e adicionar uma mensagem de resgate e outro para descriptografar os arquivos criptografados.
