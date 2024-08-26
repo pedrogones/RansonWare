@@ -1,14 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-from PyInstaller.utils.hooks import collect_all
 
-# Análise dos módulos necessários
 a = Analysis(
     ['ransonware.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['pyAesCrypt', 'requests', 'tkinter'],  # Adicione tkinter aqui
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -16,11 +14,8 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
-
-# Adiciona arquivos e dependências adicionais ao pacote
 pyz = PYZ(a.pure)
 
-# Criação do executável
 exe = EXE(
     pyz,
     a.scripts,

